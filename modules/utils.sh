@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 #include logging
+#include proxy
 
 # === 安全 Trap 管理 ===
 trap_add() {
@@ -35,11 +36,14 @@ sc_send() {
         "--header" "Content-type: application/x-www-form-urlencoded"
         "--data" "$postdata"
     )
+  response=$(curl --noproxy '*' -X POST -s -w "\n%{http_code}" "https://sctapi.ftqq.com/${key}.send" "${opts[@]}")
+  http_body=$(echo "$response" | sed '$d')     
+  http_code=$(echo "$response" | tail -n1)  
 
-    result=$(curl -X POST -s -w "%{http_code}" "https://sctapi.ftqq.com/${key}.send" "${opts[@]}")
-    if [[ "$result" -ne 200 ]]; then
-        log::warn "Failed to send message via ServerChan. HTTP status: $result"
-        return 1
-    fi
-    log::debug "Message sent successfully via ServerChan."
+  if [[ "$http_code" -ne 200 ]]; then
+      log::warn "Failed to send message via ServerChan. HTTP status: $http_code, Response: $http_body"
+      return 1
+  fi
+  log::debug "Message sent successfully via ServerChan. Response: $http_body"
+
 }
