@@ -1,5 +1,7 @@
 #! /bin/bash
 
+#include logging
+
 # === 安全 Trap 管理 ===
 trap_add() {
   local cmd="$1"
@@ -23,7 +25,7 @@ sc_send() {
     local text="$1"
     local desp="$2"
     if [[ -z "$SERVER_CHAN_KEY" ]]; then
-        echo "[WARN] SERVER_CHAN_KEY is not set."
+        log::warn "SERVER_CHAN_KEY is not set."
         return 1
     fi
     local key=$SERVER_CHAN_KEY
@@ -35,5 +37,9 @@ sc_send() {
     )
 
     result=$(curl -X POST -s -w "%{http_code}" "https://sctapi.ftqq.com/${key}.send" "${opts[@]}")
-    echo "$result"
+    if [[ "$result" -ne 200 ]]; then
+        log::warn "Failed to send message via ServerChan. HTTP status: $result"
+        return 1
+    fi
+    log::debug "Message sent successfully via ServerChan."
 }

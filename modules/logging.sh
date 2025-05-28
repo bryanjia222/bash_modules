@@ -5,7 +5,6 @@ declare -g SCRIPT_NAME="$(basename "$0")"
 
 # === 默认日志级别（可通过环境变量覆盖） ===
 : "${LOG_LEVEL:=INFO}"
-
 declare -gA LOG_LEVELS=(
   [OFF]=-1
   [ERROR]=0
@@ -13,6 +12,7 @@ declare -gA LOG_LEVELS=(
   [INFO]=2
   [DEBUG]=3
 )
+
 
 # === 日志函数 ===
 log::_log() {
